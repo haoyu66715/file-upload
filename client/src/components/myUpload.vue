@@ -90,7 +90,8 @@ import SparkMD5 from "spark-md5";
 import Promise from "bluebird";
 import io from "socket.io-client";
 import axios from "axios";
-const baseUrl = "http://192.168.101.69:7001";
+// const baseUrl = "http://127.0.0.1:7001";  本地测试！！
+const baseUrl = "http://124.220.183.99:7001";
 axios.defaults.baseURL = baseUrl;
 const blobSlice =
   File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
@@ -106,6 +107,15 @@ export default{
   filters: {
     decodeSize(value) {
       return `${value / MB} MB`;
+    },
+
+    //解决文件名过长出现滚动条
+    ellipsis(value) {
+      if (value.length >= 15) {
+        return `${value.substr(0, 3)}...${value.substr(value.length - 7)}`;
+      } else {
+        return value;
+      }
     },
   },
 
@@ -126,6 +136,7 @@ export default{
     return {
       protocol: "http",
       showFileInfo: false,
+      //图片  
       fileAbbrSvg: fileSvg,
       selectSvg: selectSvg,
       dragSvg: dragSvg,
@@ -184,7 +195,7 @@ export default{
     // 初始化socket连接
     initSocket() {
       const that = this;
-      this.socket = io(baseUrl, {
+      this.socket = io(baseUrl, {    //socket.io-client
         path: "/socket.io",
         query: { room: "upload", userId: `client_${Math.random()}` },
         transports: ["websocket"],
